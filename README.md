@@ -1,0 +1,2 @@
+# CryptoCatsInfo
+CryptoCats Info
