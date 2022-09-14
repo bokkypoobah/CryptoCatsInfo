@@ -568,7 +568,7 @@
               this.sync.completed = Object.keys(prices).length;
             } while (continuation != null /*&& !state.halt && !state.sync.error */);
             this.prices = prices;
-            localStorage.setItem('popPrices', JSON.stringify(prices));
+            localStorage.setItem('ccPrices', JSON.stringify(prices));
             this.sync.section = null;
           },
           getSVG(layerIndex, traitIndex) {
@@ -606,6 +606,7 @@
               this.sync.total = this.totalSupply;
               this.sync.section = "Owners";
 
+
               // const CRYPTOCATSHELPERADDRESS = "0x373F3AaADb81CE97D1E27c3AAb9d378f48284a4D";
               // const CRYPTOCATSHELPERABI = [{"inputs":[{"internalType":"contract
 
@@ -621,7 +622,7 @@
                 this.sync.completed = Object.keys(owners).length;
               }
               this.owners = owners;
-              localStorage.setItem('popOwners', JSON.stringify(owners));
+              localStorage.setItem('ccOwners', JSON.stringify(owners));
               this.sync.section = "ENS";
               const ensMap = {};
               for (let i in owners) {
@@ -647,20 +648,20 @@
                 this.sync.completed = parseInt(this.sync.completed) + batch.length;
               }
               this.ensMap = ensMap;
-              localStorage.setItem('popENSMap', JSON.stringify(ensMap));
+              localStorage.setItem('ccENSMap', JSON.stringify(ensMap));
               this.sync.section = null;
             }
           },
         },
         mounted() {
-          if (localStorage.getItem('popOwners')) {
-            this.owners = JSON.parse(localStorage.getItem('popOwners'));
+          if (localStorage.getItem('ccOwners')) {
+            this.owners = JSON.parse(localStorage.getItem('ccOwners'));
           }
-          if (localStorage.getItem('popENSMap')) {
-            this.ensMap = JSON.parse(localStorage.getItem('popENSMap'));
+          if (localStorage.getItem('ccENSMap')) {
+            this.ensMap = JSON.parse(localStorage.getItem('ccENSMap'));
           }
-          if (localStorage.getItem('popPrices')) {
-            this.prices = JSON.parse(localStorage.getItem('popPrices'));
+          if (localStorage.getItem('ccPrices')) {
+            this.prices = JSON.parse(localStorage.getItem('ccPrices'));
           }
         },
       })
