@@ -410,7 +410,8 @@
             //   "sellOnlyTo": "0xd0e7Bc3F1EFc5f098534Bce73589835b8273b9a0"
             // },
 
-            for (const [tokenId, token] of Object.entries(this.data)) {
+            // for (const [tokenId, token] of Object.entries(this.data)) {
+            for (const [tokenId, token] of Object.entries(CRYPTOCATSMETADATA)) {
               stage1Data.push({ tokenId, ...token });
             }
             console.log(JSON.stringify(stage1Data.slice(12, 14), null, 2));
@@ -687,6 +688,7 @@
                 }
                 this.sync.completed = parseInt(this.sync.completed) + Object.keys(tokenIds).length;
               }
+
               this.sync.section = null;
               this.sync.completed = 0;
               this.sync.total = wrappedTokenIds.length;
@@ -704,34 +706,34 @@
               this.data = data;
               localStorage.setItem('ccData', JSON.stringify(data));
 
-              // this.owners = owners;
-              // localStorage.setItem('ccData', JSON.stringify(owners));
-              // this.sync.section = "ENS";
-              // const ensMap = {};
-              // for (let i in owners) {
-              //   const owner = owners[i];
-              //   if (!ensMap[owner]) {
-              //     ensMap[owner] = owner;
-              //   }
-              // }
-              // let addresses = Object.keys(ensMap);
-              // this.sync.total = addresses.length;
-              // this.sync.completed = 0;
-              // const ensReverseRecordsContract = new ethers.Contract(ENSREVERSERECORDSADDRESS, ENSREVERSERECORDSABI, provider);
-              // const ENSOWNERBATCHSIZE = 200; // 500 fails occassionally
-              // for (let i = 0; i < addresses.length; i += ENSOWNERBATCHSIZE) {
-              //   const batch = addresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
-              //   const allnames = await ensReverseRecordsContract.getNames(batch);
-              //   for (let j = 0; j < batch.length; j++) {
-              //     const address = batch[j];
-              //     const name = allnames[j];
-              //     ensMap[address] = name != null && name.length > 0 ? name : address;
-              // //     // const normalized = normalize(address);
-              //   }
-              //   this.sync.completed = parseInt(this.sync.completed) + batch.length;
-              // }
-              // this.ensMap = ensMap;
-              // localStorage.setItem('ccENSMap', JSON.stringify(ensMap));
+              this.sync.section = null;
+              const ensMap = {};
+              for (const [tokenId, token] of Object.entries(data)) {
+                const owner = token.isWrapped ? token.wrappedOwner : token.owner;
+                if (owner != null && !ensMap[owner]) {
+                  ensMap[owner] = owner;
+                }
+              }
+              let addresses = Object.keys(ensMap);
+              this.sync.completed = 0;
+              this.sync.total = addresses.length;
+              this.sync.section = "Reverse ENS";
+              const ensReverseRecordsContract = new ethers.Contract(ENSREVERSERECORDSADDRESS, ENSREVERSERECORDSABI, provider);
+              const ENSOWNERBATCHSIZE = 20; // 500 fails occassionally
+              for (let i = 0; i < addresses.length; i += ENSOWNERBATCHSIZE) {
+                const batch = addresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
+                const allnames = await ensReverseRecordsContract.getNames(batch);
+                for (let j = 0; j < batch.length; j++) {
+                  const address = batch[j];
+                  const name = allnames[j];
+                  ensMap[address] = name != null && name.length > 0 ? name : address;
+                  // const normalized = normalize(address);
+                }
+                this.sync.completed = parseInt(this.sync.completed) + Object.keys(batch).length;
+              }
+              // console.log("ensMap: " + JSON.stringify(ensMap));
+              this.ensMap = ensMap;
+              localStorage.setItem('ccENSMap', JSON.stringify(ensMap));
               this.sync.section = null;
             }
           },
