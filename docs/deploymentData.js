@@ -20,6 +20,7 @@ const ERC721HELPERABI=[{"inputs":[],"name":"ISERC721","outputs":[{"internalType"
 const CRYPTOCATSV1 = "0x9508008227b6b3391959334604677d60169EF540";
 const CRYPTOCATSV2 = "0x19c320b43744254ebdBcb1F1BD0e2a3dc08E01dc";
 const CRYPTOCATSV3 = "0x088C6Ad962812b5Aa905BA6F3c5c145f9D4C079f";
+const WRAPPEDCRYPTOCATSADDRESS = "0xd0e7Bc3F1EFc5f098534Bce73589835b8273b9a0";
 
 const CRYPTOCATSHELPERADDRESS = "0x373F3AaADb81CE97D1E27c3AAb9d378f48284a4D";
 const CRYPTOCATSHELPERABI = [{"inputs":[{"internalType":"contract CryptoCatsMarkets","name":"cryptoCatsMarket","type":"address"},{"internalType":"uint256[]","name":"catIds","type":"uint256[]"}],"name":"getCatData","outputs":[{"internalType":"address[]","name":"owners","type":"address[]"},{"internalType":"string[]","name":"attributeNames","type":"string[]"},{"internalType":"string[6][]","name":"attributes","type":"string[6][]"},{"components":[{"internalType":"bool","name":"isForSale","type":"bool"},{"internalType":"uint256","name":"catIndex","type":"uint256"},{"internalType":"address","name":"seller","type":"address"},{"internalType":"uint256","name":"minPrice","type":"uint256"},{"internalType":"address","name":"sellOnlyTo","type":"address"}],"internalType":"struct CryptoCatsMarkets.Offer[]","name":"offers","type":"tuple[]"}],"stateMutability":"view","type":"function"}];

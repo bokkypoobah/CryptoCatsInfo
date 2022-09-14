@@ -161,23 +161,29 @@
                 <b-card-body class="m-0 p-0">
                   <b-card-text class="m-1 p-1">
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection:" class="mx-0 my-1 p-0">
-                      <b-form-input type="text" readonly size="sm" :value="info.name" class="w-50"></b-form-input>
+                      <b-form-input type="text" readonly size="sm" value="CryptoCats" class="w-50"></b-form-input>
                     </b-form-group>
-                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection Address:" class="mx-0 my-1 p-0">
+                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="Website:" class="mx-0 my-1 p-0">
+                      <b-link :href="'https://cryptocats.thetwentysix.io/'" v-b-popover.hover.bottom="'Original website'" target="_blank">https://cryptocats.thetwentysix.io/</b-link>
+                    </b-form-group>
+                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="Original Collection Address:" class="mx-0 my-1 p-0">
                       <b-link :href="'https://etherscan.io/token/' + contractAddress" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ contractAddress }}</b-link>
                     </b-form-group>
+                    <b-form-group label-cols="2" label-size="sm" label-align="right" label="Wrapped Collection Address:" class="mx-0 my-1 p-0">
+                      <b-link :href="'https://etherscan.io/token/' + wrappedContractAddress" v-b-popover.hover.bottom="'View in Etherscan.io'" target="_blank">{{ wrappedContractAddress }}</b-link>
+                    </b-form-group>
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="Collection Owner:" class="mx-0 my-1 p-0">
-                      <b-link :href="'https://twitter.com/proofofpepe'" v-b-popover.hover.bottom="'View in Twitter.com'" target="_blank">@proofofpepe</b-link>
+                      <b-link :href="'https://twitter.com/CryptoCats26'" v-b-popover.hover.bottom="'View in Twitter.com'" target="_blank">@CryptoCats26</b-link>
                     </b-form-group>
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="Markets:" class="mx-0 my-1 p-0">
-                      <b-link :href="'https://opensea.io/collection/proofofpepe'" target="_blank">OpenSea.io</b-link>,
-                      <b-link :href="'https://looksrare.org/collections/' + contractAddress" target="_blank">LooksRare.org</b-link>,
-                      <b-link :href="'https://x2y2.io/collection/proofofpepe/items'" target="_blank">X2Y2.io</b-link>,
-                      <b-link :href="'https://sudoswap.xyz/#/browse/pools/' + contractAddress" target="_blank">sudoswap.xyz</b-link>,
-                      <b-link :href="'https://www.gem.xyz/collection/proofofpepe/'" target="_blank">gem.xyz</b-link>
+                      <b-link :href="'https://opensea.io/collection/wrappedcryptocats'" target="_blank">OpenSea.io</b-link>,
+                      <b-link :href="'https://looksrare.org/collections/' + wrappedContractAddress" target="_blank">LooksRare.org</b-link>,
+                      <b-link :href="'https://x2y2.io/collection/wrappedcryptocats/items'" target="_blank">X2Y2.io</b-link>,
+                      <b-link :href="'https://sudoswap.xyz/#/browse/pools/' + wrappedContractAddress" target="_blank">sudoswap.xyz</b-link>,
+                      <b-link :href="'https://www.gem.xyz/collection/wrappedcryptocats/'" target="_blank">gem.xyz</b-link>
                     </b-form-group>
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="This Dapp GitHub:" class="mx-0 my-1 p-0">
-                      <b-link :href="'https://github.com/bokkypoobah/ProofOfPepesInfo'" v-b-popover.hover.bottom="'View in GitHub.com. Feel free to clone and improve'" target="_blank">https://github.com/bokkypoobah/ProofOfPepesInfo</b-link>
+                      <b-link :href="'https://github.com/bokkypoobah/CryptoCatsInfo'" v-b-popover.hover.bottom="'View in GitHub.com. Feel free to clone and improve'" target="_blank">https://github.com/bokkypoobah/CryptoCatsInfo</b-link>
                     </b-form-group>
                     <b-form-group label-cols="2" label-size="sm" label-align="right" label="" class="mx-0 mt-3 p-0">
                       Enjoy. And hello, from the past.
@@ -350,7 +356,10 @@
         },
         computed: {
           contractAddress() {
-            return INFO[0].address;
+            return CRYPTOCATSV3;
+          },
+          wrappedContractAddress() {
+            return WRAPPEDCRYPTOCATSADDRESS;
           },
           tokens() {
             return INFO[0].tokenData;
@@ -625,7 +634,6 @@
               const cryptoCatsHelper = new ethers.Contract(CRYPTOCATSHELPERADDRESS, CRYPTOCATSHELPERABI, provider);
               const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
               const data = {};
-              const WRAPPEDCRYPTOCATSADDRESS = "0xd0e7Bc3F1EFc5f098534Bce73589835b8273b9a0";
               const NFTOWNERBATCHSIZE = 200; // 500 OK
 
               this.sync.completed = 0;
