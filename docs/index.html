@@ -423,7 +423,7 @@
             for (const [tokenId, token] of Object.entries(CRYPTOCATSMETADATA)) {
               stage1Data.push({ tokenId, ...token });
             }
-            console.log(JSON.stringify(stage1Data.slice(12, 14), null, 2));
+            // console.log(JSON.stringify(stage1Data.slice(12, 14), null, 2));
 
             // if (Object.keys(this.selectedTraits).length == 0) {
             //   for (const tokenId of Object.keys(INFO[0].tokenData)) {
@@ -454,11 +454,12 @@
             // }
             let results = stage1Data;
             if (this.searchAccount != null && this.searchAccount.length > 0) {
+              console.log("this.searchAccount: " + this.searchAccount);
               const searchAccounts = this.searchAccount.split(/[, \t\n]+/).map(s => s.toLowerCase());
               results = [];
               for (let i in stage1Data) {
                 const d = stage1Data[i];
-                const owner = this.owners[d.tokenId] || null;
+                const owner = this.data[d.tokenId].isWrapped ? this.data[d.tokenId].wrappedOwner : this.data[d.tokenId].owner;
                 const ensName = owner == null ? null : this.ensMap[owner];
                 for (searchAccount of searchAccounts) {
                   if (owner != null && owner.toLowerCase().includes(searchAccount)) {
