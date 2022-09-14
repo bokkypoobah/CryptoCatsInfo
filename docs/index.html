@@ -605,6 +605,11 @@
               this.sync.completed = 0;
               this.sync.total = this.totalSupply;
               this.sync.section = "Owners";
+
+              // const CRYPTOCATSHELPERADDRESS = "0x373F3AaADb81CE97D1E27c3AAb9d378f48284a4D";
+              // const CRYPTOCATSHELPERABI = [{"inputs":[{"internalType":"contract
+
+
               const generateRange = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
               for (let i = 0; i < this.totalSupply; i += NFTOWNERBATCHSIZE) {
                 const to = (i + NFTOWNERBATCHSIZE > this.totalSupply) ? this.totalSupply : i + NFTOWNERBATCHSIZE;
