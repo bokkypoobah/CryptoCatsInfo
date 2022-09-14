@@ -627,33 +627,16 @@
               const data = {};
               const WRAPPEDCRYPTOCATSADDRESS = "0xd0e7Bc3F1EFc5f098534Bce73589835b8273b9a0";
               const NFTOWNERBATCHSIZE = 200; // 500 OK
+
               this.sync.completed = 0;
               this.sync.total = this.totalSupply;
               this.sync.section = "CryptoCatsMarkets";
-
               const generateRange = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
-
-              // struct Offer {
-              //     bool isForSale;
-              //     uint catIndex;
-              //     address seller;
-              //     uint minPrice;
-              //     address sellOnlyTo;
-              // }
-
-              // function getCatData(CryptoCatsMarkets cryptoCatsMarket, uint[] memory catIds) public view returns (
-              //     address[] memory owners,
-              //     string[] memory attributeNames,
-              //     string[6][] memory attributes,
-              //     CryptoCatsMarkets.Offer[] memory offers
-
               const wrappedTokenIds = [];
               for (let i = 0; i < this.totalSupply; i += NFTOWNERBATCHSIZE) {
                 const to = (i + NFTOWNERBATCHSIZE > this.totalSupply) ? this.totalSupply : i + NFTOWNERBATCHSIZE;
                 const tokenIds = generateRange(i, to - 1, 1);
-                // console.log("tokenIds: " + JSON.stringify(tokenIds));
                 const catData = await cryptoCatsHelper.getCatData(CRYPTOCATSV3, tokenIds);
-                // console.log("catData: " + JSON.stringify(catData));
                 for (let j = 0; j < catData[0].length; j++) {
                   const owner = catData[0][j];
                   let isWrapped = false;
@@ -693,8 +676,7 @@
               this.sync.completed = 0;
               this.sync.total = wrappedTokenIds.length;
               this.sync.section = "WrappedCryptoCats";
-
-              for (let i = 0; i < wrappedTokenIds.length && i < 25; i += NFTOWNERBATCHSIZE) {
+              for (let i = 0; i < wrappedTokenIds.length; i += NFTOWNERBATCHSIZE) {
                 const batch = wrappedTokenIds.slice(i, parseInt(i) + NFTOWNERBATCHSIZE);
                 const ownersResult = await erc721Helper.ownersByTokenIds(WRAPPEDCRYPTOCATSADDRESS, batch);
                 for (let j = 0; j < ownersResult[0].length; j++) {
@@ -702,7 +684,6 @@
                 }
                 this.sync.completed = parseInt(this.sync.completed) + Object.keys(batch).length;
               }
-
               this.data = data;
               localStorage.setItem('ccData', JSON.stringify(data));
 
@@ -719,7 +700,7 @@
               this.sync.total = addresses.length;
               this.sync.section = "Reverse ENS";
               const ensReverseRecordsContract = new ethers.Contract(ENSREVERSERECORDSADDRESS, ENSREVERSERECORDSABI, provider);
-              const ENSOWNERBATCHSIZE = 20; // 500 fails occassionally
+              const ENSOWNERBATCHSIZE = 200; // 500 fails occassionally
               for (let i = 0; i < addresses.length; i += ENSOWNERBATCHSIZE) {
                 const batch = addresses.slice(i, parseInt(i) + ENSOWNERBATCHSIZE);
                 const allnames = await ensReverseRecordsContract.getNames(batch);
