@@ -607,8 +607,11 @@
             return INFO[0].layers[layerIndex].traits[parseInt(traitIndex)].svg;
           },
           owner(tokenId, length = 24) {
-            const address = this.owners[tokenId] || null;
+            const address = this.data[tokenId].isWrapped ? this.data[tokenId].wrappedOwner : this.data[tokenId].owner;
+            // console.log("address: " + address);
+            // console.log("this.ensMap: " + JSON.stringify(this.ensMap));
             if (address in this.ensMap) {
+              // console.log("FOUND "+ tokenId + " " + address + " in ensMap: " + JSON.stringify(this.ensMap[address]));
               return this.ensMap[address].substring(0, length);
             }
             return address == null ? null : address.substring(0, length);
