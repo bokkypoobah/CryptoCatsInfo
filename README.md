@@ -7,3 +7,27 @@ See also: [Wrapped CryptoCats Official](https://opensea.io/collection/wrappedcry
 <br />
 
 See [https://bokkypoobah.github.io/CryptoCatsInfo/](https://bokkypoobah.github.io/CryptoCatsInfo/).
+
+<br />
+
+<hr />
+
+### Retrieving Metadata
+
+In [scripts](scripts):
+
+```
+node 01_scrapeMetadata.js
+
+```
+
+Results in [scripts/cryptoCatsMetadata.json](scripts/cryptoCatsMetadata.json).
+
+
+<br />
+
+<br />
+
+Enjoy!
+
+(c) BokkyPooBah / Bok Consulting Pty Ltd - Sep 2022. The MIT Licence.

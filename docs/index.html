@@ -55,16 +55,20 @@
               <div class="mt-1 pr-1">
                 <b-form-input type="text" size="sm" v-model.trim="searchAccount" debounce="600" placeholder="🔍 ens1, addy1, ..."></b-form-input>
               </div>
+              <!--
               <div class="mt-1">
                 <b-form-select size="sm" v-model="layer" :options="layerOptions" v-b-popover.hover.top="'Filter by layer'"></b-form-select>
               </div>
+              -->
               <div class="mt-1 flex-grow-1">
               </div>
+              <!--
               <div class="mt-1 pr-1">
                 <b-button :disabled="sync.section != null" size="sm" @click="retrievePrices" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Retrieve asking prices via the @reservoir0x API'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Prices</b-button>
               </div>
+              -->
               <div class="mt-1">
-                <b-button :disabled="sync.section != null" size="sm" @click="retrieveOwners" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Retrieve ownership and ENS via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Owners</b-button>
+                <b-button :disabled="sync.section != null" size="sm" @click="retrieveData" variant="primary" style="min-width: 80px;" v-b-popover.hover.top="'Retrieve ownership and ENS via the web3 connection'"><b-icon-cloud-download shift-v="+1" font-scale="0.9"></b-icon-cloud-download> Data</b-button>
               </div>
               <div class="mt-1 flex-grow-1">
               </div>
@@ -408,7 +412,7 @@
             for (const [tokenId, token] of Object.entries(this.data)) {
               stage1Data.push({ tokenId, ...token });
             }
-            console.log(JSON.stringify(stage1Data.slice(0, 10), null, 2));
+            console.log(JSON.stringify(stage1Data.slice(12, 14), null, 2));
 
             // if (Object.keys(this.selectedTraits).length == 0) {
             //   for (const tokenId of Object.keys(INFO[0].tokenData)) {
@@ -598,8 +602,8 @@
             }
             return address == null ? null : address.substring(0, length);
           },
-          async retrieveOwners() {
-            console.log("retrieveOwners");
+          async retrieveData() {
+            console.log("retrieveData");
             let connected = true;
             if (!window.ethereum) {
               alert("Please use the https://metamask.io addon with Firefox, Chromium, Opera or Chrome, or any other other web3 browser, for web3 data retrieval. And refresh!");
