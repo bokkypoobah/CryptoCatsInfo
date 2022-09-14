@@ -624,6 +624,7 @@
               const cryptoCatsHelper = new ethers.Contract(CRYPTOCATSHELPERADDRESS, CRYPTOCATSHELPERABI, provider);
               const erc721Helper = new ethers.Contract(ERC721HELPERADDRESS, ERC721HELPERABI, provider);
               const data = {};
+              const WRAPPEDCRYPTOCATSADDRESS = "0xd0e7Bc3F1EFc5f098534Bce73589835b8273b9a0";
               const NFTOWNERBATCHSIZE = 200; // 500 OK
               this.sync.completed = 0;
               this.sync.total = this.totalSupply;
@@ -645,7 +646,7 @@
               //     string[6][] memory attributes,
               //     CryptoCatsMarkets.Offer[] memory offers
 
-
+              const wrappedTokenIds = [];
               for (let i = 0; i < this.totalSupply; i += NFTOWNERBATCHSIZE) {
                 const to = (i + NFTOWNERBATCHSIZE > this.totalSupply) ? this.totalSupply : i + NFTOWNERBATCHSIZE;
                 const tokenIds = generateRange(i, to - 1, 1);
@@ -654,6 +655,11 @@
                 // console.log("catData: " + JSON.stringify(catData));
                 for (let j = 0; j < catData[0].length; j++) {
                   const owner = catData[0][j];
+                  let isWrapped = false;
+                  if (owner == WRAPPEDCRYPTOCATSADDRESS) {
+                    wrappedTokenIds.push(tokenIds[j]);
+                    isWrapped = true;
+                  }
                   const name = catData[2][j][0];
                   const offer = catData[3][j];
                   const isForSale = offer[0];
@@ -666,9 +672,11 @@
                     " isForSale: " + isForSale + ", catIndex: " + catIndex + ", seller: " + seller.substring(0, 16) +
                       ", minPrice: " + minPrice + ", sellOnlyTo: " + sellOnlyTo.substring(0, 16));
                   }
-                //   owners[tokenIds[j]] = catData[1][j];
                   data[tokenIds[j]] = {
                     owner,
+                    isWrapped,
+                    wrappedOwner: null,
+                    attributes: CRYPTOCATSMETADATA[tokenIds[j]].attributes,
                     name,
                     isForSale,
                     catIndex,
@@ -679,19 +687,23 @@
                 }
                 this.sync.completed = parseInt(this.sync.completed) + Object.keys(tokenIds).length;
               }
+              this.sync.section = null;
+              this.sync.completed = 0;
+              this.sync.total = wrappedTokenIds.length;
+              this.sync.section = "WrappedCryptoCats";
+
+              for (let i = 0; i < wrappedTokenIds.length && i < 25; i += NFTOWNERBATCHSIZE) {
+                const batch = wrappedTokenIds.slice(i, parseInt(i) + NFTOWNERBATCHSIZE);
+                const ownersResult = await erc721Helper.ownersByTokenIds(WRAPPEDCRYPTOCATSADDRESS, batch);
+                for (let j = 0; j < ownersResult[0].length; j++) {
+                  data[batch[j]].wrappedOwner = ownersResult[1][j];
+                }
+                this.sync.completed = parseInt(this.sync.completed) + Object.keys(batch).length;
+              }
+
               this.data = data;
-              // console.log(JSON.stringify(data, null, 2));
               localStorage.setItem('ccData', JSON.stringify(data));
 
-              // for (let i = 0; i < this.totalSupply; i += NFTOWNERBATCHSIZE) {
-              //   const to = (i + NFTOWNERBATCHSIZE > this.totalSupply) ? this.totalSupply : i + NFTOWNERBATCHSIZE;
-              //   const tokenIds = generateRange(i, to, 1);
-              //   const ownersResult = await erc721Helper.ownersByTokenIds(this.contractAddress, tokenIds);
-              //   for (let j = 0; j < ownersResult[0].length; j++) {
-              //     owners[tokenIds[j]] = ownersResult[1][j];
-              //   }
-              //   this.sync.completed = Object.keys(owners).length;
-              // }
               // this.owners = owners;
               // localStorage.setItem('ccData', JSON.stringify(owners));
               // this.sync.section = "ENS";
