@@ -609,16 +609,45 @@
 
               const generateRange = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
 
+              // struct Offer {
+              //     bool isForSale;
+              //     uint catIndex;
+              //     address seller;
+              //     uint minPrice;
+              //     address sellOnlyTo;
+              // }
+
+              // function getCatData(CryptoCatsMarkets cryptoCatsMarket, uint[] memory catIds) public view returns (
+              //     address[] memory owners,
+              //     string[] memory attributeNames,
+              //     string[6][] memory attributes,
+              //     CryptoCatsMarkets.Offer[] memory offers
+
+
               for (let i = 0; i < this.totalSupply; i += NFTOWNERBATCHSIZE) {
-                const to = (i + NFTOWNERBATCHSIZE > this.totalSupply) ? this.totalSupply - 1 : i + NFTOWNERBATCHSIZE;
-                const tokenIds = generateRange(i, to, 1);
-                console.log("tokenIds: " + JSON.stringify(tokenIds));
-                const ownersResult = await cryptoCatsHelper.getCatData(CRYPTOCATSV3, tokenIds);
-                console.log("ownersResult: " + JSON.stringify(ownersResult));
-                // for (let j = 0; j < ownersResult[0].length; j++) {
-                //   owners[tokenIds[j]] = ownersResult[1][j];
-                // }
-                this.sync.completed = Object.keys(owners).length;
+                const to = (i + NFTOWNERBATCHSIZE > this.totalSupply) ? this.totalSupply : i + NFTOWNERBATCHSIZE;
+                const tokenIds = generateRange(i, to - 1, 1);
+                // console.log("tokenIds: " + JSON.stringify(tokenIds));
+                const catData = await cryptoCatsHelper.getCatData(CRYPTOCATSV3, tokenIds);
+                // console.log("catData: " + JSON.stringify(catData));
+                for (let j = 0; j < catData[0].length; j++) {
+                  const owner = catData[0][j];
+                  const name = catData[2][j][0];
+                  const offer = catData[3][j];
+                  const isForSale = offer[0];
+                  const catIndex = offer[1];
+                  const seller = offer[2];
+                  const minPrice = offer[3];
+                  const sellOnlyTo = offer[4];
+                  if (isForSale && seller == owner) {
+                    console.log(tokenIds[j] + " " + owner.substring(0, 16) + " " + name +
+                    " isForSale: " + isForSale + ", catIndex: " + catIndex + ", seller: " + seller.substring(0, 16) +
+                      ", minPrice: " + minPrice + ", sellOnlyTo: " + sellOnlyTo.substring(0, 16));
+                  }
+                //   owners[tokenIds[j]] = catData[1][j];
+
+                }
+                this.sync.completed = parseInt(this.sync.completed) + Object.keys(tokenIds).length;
               }
               // this.owners = owners;
               // localStorage.setItem('ccOwners', JSON.stringify(owners));
