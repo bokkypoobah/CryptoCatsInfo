@@ -18,7 +18,7 @@
     <script src="js/bootstrap-vue-icons.min.js"></script>
     <script src="js/ethers-5.6.umd.min.js" type="application/javascript"></script>
     <script src="deploymentData.js"></script>
-    <script src="info.js"></script>
+    <!-- <script src="info.js"></script> -->
     <script src="cryptoCatsMetadata.js"></script>
 
     <link rel="apple-touch-icon" sizes="57x57" href="images/apple-icon-57x57.png">
@@ -129,33 +129,6 @@
                 </div>
               </div>
             </div>
-            <b-card v-if="layer != null" no-header no-body class="m-0 mt-1 p-1 border-1">
-              <b-card-group deck class="m-1 ml-0 p-0">
-                <div v-for="trait in traitOptions">
-                  <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7rem;">
-                    <b-avatar button @click="toggleTrait(layer, trait.value)" rounded size="7rem" :src="getSVG(layer, trait.value)">
-                      <template v-if="selectedTraits[layer] && selectedTraits[layer][trait.value]" #badge><b-icon icon="check"></b-icon></template>
-                    </b-avatar>
-                    <b-card-text class="text-right">
-                      <div class="d-flex justify-content-between m-0 p-0">
-                        <div>
-                          <font size="-2">
-                            <b-badge variant="light" v-b-popover.hover.bottom="'blah'">{{ trait.text }}</b-badge>
-                          </font>
-                        </div>
-                        <div class="flex-grow-1">
-                        </div>
-                        <div>
-                          <font size="-2">
-                            <b-badge variant="light" v-b-popover.hover.bottom="'#tokens'">{{ collectionTokensAttributesWithCounts[layer][trait.value] && collectionTokensAttributesWithCounts[layer][trait.value].length || 0 }}</b-badge>
-                          </font>
-                        </div>
-                      </div>
-                    </b-card-text>
-                  </b-card>
-                </div>
-              </b-card-group>
-            </b-card>
             <div v-if="showInfo">
               <b-card no-header no-body class="m-2 p-1">
                 <b-card-body class="m-0 p-0">
@@ -339,7 +312,7 @@
       window.app = new Vue({
         el: '#app',
         data: {
-          info: INFO[0],
+          // info: INFO[0],
           data: {},
           showInfo: false,
           showFilter: true,
@@ -387,7 +360,6 @@
           prices: {},
           owners: {},
           ensMap: {},
-          selectedTraits: {}, // TODO: Delete
           collectionAttributeFilter: {},
           sync: {
             section: null,
@@ -407,26 +379,7 @@
             return INFO[0].tokenData;
           },
           totalSupply() {
-            return 625; // TODO: ethers.BigNumber.from(INFO[0].totalSupply).toNumber();
-          },
-          layerOptions() {
-            const results = [];
-            results.push({ value: null, text: '(select layer)' });
-            for (const item of INFO[0].layers) {
-              results.push({ value: item.layerIndex, text: item.name });
-            }
-            return results;
-          },
-          traitOptions() {
-            const results = [];
-            if (this.layer != null) {
-              let traitIndex = 0;
-              for (const trait of INFO[0].layers[this.layer].traits) {
-                results.push({ value: traitIndex.toString().padStart(3, '0'), text: trait.name, mimeType: trait.mimeType, base64: trait.base64 });
-                traitIndex++;
-              }
-            }
-            return results;
+            return Object.keys(CRYPTOCATSMETADATA).length;
           },
           collectionTokensAttributesWithCounts() {
             const collator = {};
@@ -448,8 +401,8 @@
             return collator;
           },
           filteredCollectionTokens() {
-            let stage1Data = this.selectedTraits ? [] : [];
-            console.log("filteredCollectionTokens: " + JSON.stringify(this.selectedTraits));
+            let stage1Data = this.collectionAttributeFilter ? [] : [];
+            console.log("filteredCollectionTokens: " + JSON.stringify(this.collectionAttributeFilter));
 
             // "16": {
             //   "owner": "0xd0e7Bc3F1EFc5f098534Bce73589835b8273b9a0",
@@ -461,24 +414,10 @@
             //   "sellOnlyTo": "0xd0e7Bc3F1EFc5f098534Bce73589835b8273b9a0"
             // },
 
-            // for (const [tokenId, token] of Object.entries(this.data)) {
+            let selectedTokenIds = [];
             if (Object.keys(this.collectionAttributeFilter) == 0) {
-              for (const [tokenId, token] of Object.entries(CRYPTOCATSMETADATA)) {
-                const data = this.data[tokenId];
-                if (tokenId == 251 || tokenId == 13) {
-                  console.log(tokenId + " " + JSON.stringify(token) + " " + JSON.stringify(data));
-                }
-                let price = null;
-                let priceSource = null;
-                if (data && !data.isWrapped && data.isForSale && data.seller == data.owner) {
-                  price = data.minPrice;
-                  priceSource = "CryptoCatsMarkets";
-                }
-                stage1Data.push({ tokenId, ...token, price, priceSource, isWrapped: data && data.isWrapped });
-              }
-              console.log(JSON.stringify(stage1Data.slice(251, 252), null, 2));
+              selectedTokenIds = Object.keys(CRYPTOCATSMETADATA);
             } else {
-              let selectedTokenIds = [];
               for (const [trait, value] of Object.entries(this.collectionAttributeFilter)) {
                 let thisTraitTokenIds = [];
                 for (const selectedValue of Object.keys(value)) {
@@ -491,47 +430,22 @@
                   selectedTokenIds = selectedTokenIds.filter(tokenId => thisTraitTokenIds.includes(tokenId));
                 }
               }
-              // stage1Data = Object.values(selectedTokenIds).map(tokenId => { tokenId, CRYPTOCATSMETADATA[tokenId] });
-              for (const tokenId of selectedTokenIds) {
-                const token = CRYPTOCATSMETADATA[tokenId];
-                const data = this.data[tokenId];
-                let price = null;
-                let priceSource = null;
-                if (data && !data.isWrapped && data.isForSale && data.seller == data.owner) {
-                  price = data.minPrice;
-                  priceSource = "CryptoCatsMarkets";
-                }
-                stage1Data.push({ tokenId, ...token, price, priceSource, isWrapped: data && data.isWrapped });
+            }
+            for (const tokenId of selectedTokenIds) {
+              const token = CRYPTOCATSMETADATA[tokenId];
+              const data = this.data[tokenId];
+              if (tokenId == 251 || tokenId == 13) {
+                console.log(tokenId + " " + JSON.stringify(token) + " " + JSON.stringify(data));
               }
+              let price = null;
+              let priceSource = null;
+              if (data && !data.isWrapped && data.isForSale && data.seller == data.owner) {
+                price = data.minPrice;
+                priceSource = "CryptoCatsMarkets";
+              }
+              stage1Data.push({ tokenId, ...token, price, priceSource, isWrapped: data && data.isWrapped });
             }
 
-            // if (Object.keys(this.selectedTraits).length == 0) {
-            //   for (const tokenId of Object.keys(INFO[0].tokenData)) {
-            //     const token = INFO[0].tokenData[tokenId];
-            //     const price = this.prices[token.tokenId] || null;
-            //     stage1Data.push({ ...token, price });
-            //   }
-            // } else {
-            //   let selectedTokenIds = [];
-            //   for (const [trait, value] of Object.entries(this.selectedTraits)) {
-            //     console.log(trait + ' ' + JSON.stringify(value));
-            //     let thisTraitTokenIds = [];
-            //     for (const selectedValue of Object.keys(value)) {
-            //       const tokenIds = this.collectionTokensAttributesWithCounts[trait][selectedValue] || [];
-            //       thisTraitTokenIds = [...thisTraitTokenIds, ...tokenIds];
-            //     }
-            //     if (selectedTokenIds.length == 0) {
-            //       selectedTokenIds = thisTraitTokenIds;
-            //     } else {
-            //       selectedTokenIds = selectedTokenIds.filter(tokenId => thisTraitTokenIds.includes(tokenId));
-            //     }
-            //   }
-            //   for (const tokenId of selectedTokenIds) {
-            //     const token = INFO[0].tokenData[tokenId];
-            //     const price = this.prices[token.tokenId] || null;
-            //     stage1Data.push({ ...token, price });
-            //   }
-            // }
             let results = stage1Data;
             if (this.searchAccount != null && this.searchAccount.length > 0) {
               console.log("this.searchAccount: " + this.searchAccount);
@@ -633,19 +547,6 @@
           },
         },
         methods: {
-          toggleTrait(layer, trait) {
-            if (!this.selectedTraits[layer]) {
-              Vue.set(this.selectedTraits, layer, {});
-            }
-            if (this.selectedTraits[layer][trait]) {
-              Vue.delete(this.selectedTraits[layer], trait);
-              if (Object.keys(this.selectedTraits[layer]) == 0) {
-                Vue.delete(this.selectedTraits, layer);
-              }
-            } else {
-              Vue.set(this.selectedTraits[layer], trait, true);
-            }
-          },
           async retrievePrices() {
             let continuation = null;
             let prices = {};
