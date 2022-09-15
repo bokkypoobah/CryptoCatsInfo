@@ -241,21 +241,21 @@
                                 </b-button>
                                 <b-popover :target="'popover-target-' + token.tokenId" placement="right">
                                   <template #title>{{ token.tokenId }}</template>
-                                  <b-link :href="'https://opensea.io/assets/ethereum/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in opensea.io'" target="_blank">
+                                  <b-link :href="'https://cryptocats.thetwentysix.io/cat/' + token.tokenId" v-b-popover.hover.bottom="'Original website'" target="_blank">
+                                    View on cryptocats.thetwentysix.io
+                                  </b-link>
+                                  <b-link v-if="token.isWrapped" :href="'https://opensea.io/assets/ethereum/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in opensea.io'" target="_blank">
                                     OpenSea
                                   </b-link>
                                   <br />
-                                  <b-link :href="'https://looksrare.org/collections/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in looksrare.org'" target="_blank">
+                                  <b-link v-if="token.isWrapped" :href="'https://looksrare.org/collections/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in looksrare.org'" target="_blank">
                                     LooksRare
                                   </b-link>
                                   <br />
-                                  <b-link :href="'https://x2y2.io/eth/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in x2y2.io'" target="_blank">
+                                  <b-link v-if="token.isWrapped" :href="'https://x2y2.io/eth/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in x2y2.io'" target="_blank">
                                     X2Y2
                                   </b-link>
                                   <br />
-                                  <b-link :href="'https://app.indeliblelabs.io/api/png/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'Server generated PNG'" target="_blank">
-                                    PNG Image
-                                  </b-link>
                                 </b-popover>
                               </font>
                             </div>
@@ -263,7 +263,7 @@
                             </div>
                             <div>
                               <font size="-1">
-                                <b-badge variant="transparent" v-b-popover.hover.bottom="'On '">{{ owner(token.tokenId) }}</b-badge>
+                                <b-badge :variant="token.isWrapped ? 'primary' : 'transparent'" v-b-popover.hover.bottom="token.isWrapped ? 'Wrapped' : 'Unwrapped'">{{ owner(token.tokenId) }}</b-badge>
                               </font>
                             </div>
                             <div class="flex-grow-1">
@@ -465,7 +465,7 @@
             if (Object.keys(this.collectionAttributeFilter) == 0) {
               for (const [tokenId, token] of Object.entries(CRYPTOCATSMETADATA)) {
                 const data = this.data[tokenId];
-                if (tokenId == 251) {
+                if (tokenId == 251 || tokenId == 13) {
                   console.log(tokenId + " " + JSON.stringify(token) + " " + JSON.stringify(data));
                 }
                 let price = null;
@@ -474,7 +474,7 @@
                   price = data.minPrice;
                   priceSource = "CryptoCatsMarkets";
                 }
-                stage1Data.push({ tokenId, ...token, price, priceSource });
+                stage1Data.push({ tokenId, ...token, price, priceSource, isWrapped: data && data.isWrapped });
               }
               console.log(JSON.stringify(stage1Data.slice(251, 252), null, 2));
             } else {
@@ -494,7 +494,14 @@
               // stage1Data = Object.values(selectedTokenIds).map(tokenId => { tokenId, CRYPTOCATSMETADATA[tokenId] });
               for (const tokenId of selectedTokenIds) {
                 const token = CRYPTOCATSMETADATA[tokenId];
-                stage1Data.push({ tokenId, ...token });
+                const data = this.data[tokenId];
+                let price = null;
+                let priceSource = null;
+                if (data && !data.isWrapped && data.isForSale && data.seller == data.owner) {
+                  price = data.minPrice;
+                  priceSource = "CryptoCatsMarkets";
+                }
+                stage1Data.push({ tokenId, ...token, price, priceSource, isWrapped: data && data.isWrapped });
               }
             }
 
