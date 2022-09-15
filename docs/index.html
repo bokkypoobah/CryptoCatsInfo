@@ -268,9 +268,9 @@
                             </div>
                             <div class="flex-grow-1">
                             </div>
-                            <div v-if="token.price && token.price.price">
+                            <div v-if="token.price">
                               <font size="-1">
-                                <b-badge variant="success" v-b-popover.hover.bottom="'On ' + token.price.source">{{ token.price.price }}</b-badge>
+                                <b-badge variant="success" v-b-popover.hover.bottom="'On ' + token.priceSource">{{ token.price }}</b-badge>
                               </font>
                             </div>
                           </div>
