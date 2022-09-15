@@ -397,18 +397,6 @@
           },
           filteredCollectionTokens() {
             let stage1Data = this.collectionAttributeFilter ? [] : [];
-            console.log("filteredCollectionTokens: " + JSON.stringify(this.collectionAttributeFilter));
-
-            // "16": {
-            //   "owner": "0xd0e7Bc3F1EFc5f098534Bce73589835b8273b9a0",
-            //   "name": "",
-            //   "isForSale": true,
-            //   "catIndex": 16,
-            //   "seller": "0x11213Da74160B9e8764774AAa6035e20ad717c35",
-            //   "minPrice": "0.0",
-            //   "sellOnlyTo": "0xd0e7Bc3F1EFc5f098534Bce73589835b8273b9a0"
-            // },
-
             let selectedTokenIds = [];
             if (Object.keys(this.collectionAttributeFilter) == 0) {
               selectedTokenIds = Object.keys(CRYPTOCATSMETADATA);
@@ -429,9 +417,9 @@
             for (const tokenId of selectedTokenIds) {
               const token = CRYPTOCATSMETADATA[tokenId];
               const data = this.data[tokenId];
-              // if (tokenId == 251 || tokenId == 13) {
-              //   console.log(tokenId + " " + JSON.stringify(token) + " " + JSON.stringify(data));
-              // }
+              if (tokenId == 546 || tokenId == 13) {
+                console.log(tokenId + " " + JSON.stringify(token) + " " + JSON.stringify(data));
+              }
               let price = null;
               let priceSource = null;
               if (data && !data.isWrapped && data.isForSale && data.seller == data.owner) {
@@ -469,7 +457,7 @@
                 }
               }
             }
-            console.log("filteredCollectionTokens: " + JSON.stringify(results.slice(0, 5)));
+            // console.log("filteredCollectionTokens: " + JSON.stringify(results.slice(0, 5)));
             return results;
           },
           filteredSortedCollectionTokens() {
@@ -675,7 +663,7 @@
                   const minPrice = ethers.utils.formatEther(offer[3]);
                   const sellOnlyTo = offer[4];
                   // let price = null;
-                  if (isForSale && seller == owner) {
+                  if (false && isForSale && seller == owner) {
                     // price = minPrice;
                     console.log(tokenIds[j] + " " + owner.substring(0, 16) + " " + name +
                     " isForSale: " + isForSale + ", catIndex: " + catIndex + ", seller: " + seller.substring(0, 16) +
@@ -692,7 +680,8 @@
                     catIndex,
                     seller,
                     minPrice,
-                    sellOnlyTo
+                    sellOnlyTo,
+                    wrappedPrice: null,
                   }
                 }
                 this.sync.completed = parseInt(this.sync.completed) + Object.keys(tokenIds).length;
@@ -710,6 +699,43 @@
                 }
                 this.sync.completed = parseInt(this.sync.completed) + Object.keys(batch).length;
               }
+
+              this.sync.section = null;
+              this.sync.completed = 0;
+              this.sync.total = wrappedTokenIds.length;
+              this.sync.section = "Wrapped Prices";
+              let continuation = null;
+              do {
+                let url = "https://api.reservoir.tools/tokens/v5?contract=" + WRAPPEDCRYPTOCATSADDRESS + "&limit=100" +
+                  (continuation != null ? "&continuation=" + continuation : '');
+                console.log("url: " + url);
+                const priceData = await fetch(url)
+                  // .then(handleErrors)
+                  .then(response => response.json())
+                  .catch(function(error) {
+                     console.log("ERROR - updateCollection: " + error);
+                     // state.sync.error = true;
+                     return [];
+                  });
+                // console.log(JSON.stringify(priceData));
+                continuation = priceData.continuation;
+                if (priceData && priceData.tokens) {
+                  for (const token of priceData.tokens) {
+                    // console.log(JSON.stringify(token, null, 2));
+                    let price = null;
+                    let validUntil = null;
+                    let source = null;
+                    if (token.market.floorAsk.price) {
+                      price = token.market.floorAsk.price.amount.native;
+                      validUntil = token.market.floorAsk.validUntil;
+                      source = token.market.floorAsk.source.name;
+                    }
+                    // console.log(token.token.tokenId + " " + JSON.stringify(token) + " " + price + " " + validUntil + " " + source);
+                    data[token.token.tokenId].wrappedPrice = { price, validUntil, source, lastSell: token.token.lastSell, rarityRank: token.rarityRank };
+                  }
+                  this.sync.completed = parseInt(this.sync.completed) + Object.keys(priceData.tokens).length;
+                }
+              } while (continuation != null /*&& !state.halt && !state.sync.error */);
               this.data = data;
               localStorage.setItem('ccData', JSON.stringify(data));
 
