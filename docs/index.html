@@ -194,107 +194,142 @@
                 </b-card-body>
               </b-card>
             </div>
-            <div v-if="!ownerView">
-              <b-card-group deck class="m-1 ml-0 p-0">
-                <div v-for="token in pagedFilteredCollectionTokens">
-                  <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 15rem;">
-                    <b-avatar button rounded size="15rem" :src="'./images/cryptocat_' + token.tokenId + '.png'" style="background-color: #fafafa; "></b-avatar>
-                    <b-card-text class="text-right">
-                      <div class="d-flex justify-content-between m-0 p-0">
-                        <div>
-                          <font size="-2">
-                            <b-button size="sm" :id="'popover-target-' + token.tokenId" variant="link" class="m-0 p-0">
-                              {{ token.tokenId }}
-                            </b-button>
-                            <b-popover :target="'popover-target-' + token.tokenId" placement="right">
-                              <template #title>{{ token.tokenId }}</template>
-                              <b-link :href="'https://opensea.io/assets/ethereum/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in opensea.io'" target="_blank">
-                                OpenSea
-                              </b-link>
-                              <br />
-                              <b-link :href="'https://looksrare.org/collections/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in looksrare.org'" target="_blank">
-                                LooksRare
-                              </b-link>
-                              <br />
-                              <b-link :href="'https://x2y2.io/eth/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in x2y2.io'" target="_blank">
-                                X2Y2
-                              </b-link>
-                              <br />
-                              <b-link :href="'https://app.indeliblelabs.io/api/png/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'Server generated PNG'" target="_blank">
-                                PNG Image
-                              </b-link>
-                            </b-popover>
-                          </font>
-                        </div>
-                        <div class="flex-grow-1">
-                        </div>
-                        <div>
-                          <font size="-1">
-                            <b-badge variant="transparent" v-b-popover.hover.bottom="'On '">{{ owner(token.tokenId) }}</b-badge>
-                          </font>
-                        </div>
-                        <div class="flex-grow-1">
-                        </div>
-                        <div v-if="token.price && token.price.price">
-                          <font size="-1">
-                            <b-badge variant="success" v-b-popover.hover.bottom="'On ' + token.price.source">{{ token.price.price }}</b-badge>
-                          </font>
-                        </div>
-                      </div>
-                    </b-card-text>
-                  </b-card>
-                </div>
-              </b-card-group>
-            </div>
-            <div v-else>
-              <b-table small :fields="ownersFields" :items="pagedFilteredSortedTokensByOwners" responsive="sm" class="m-1">
-                <template #cell(index)="data">
-                  {{ ((ownerCurrentPage - 1) * ownerPageSize) + parseInt(data.index) + 1 }}
-                </template>
-                <template #cell(owner)="data">
-                  {{ owner(data.item.tokenIds[0]) }}
-                  {{ data.item.tokenIds.length + '(' + (data.item.tokenIds.length*100/totalSupply).toFixed(2) + '%)' }}
-                </template>
-                <template #cell(tokens1)="data">
+
+            <b-row class="m-0 p-0">
+              <!-- Collection Filter -->
+              <b-col v-if="showFilter" cols="2" class="m-0 p-0 border-0">
+                <b-card no-header no-body class="m-0 p-0 border-0">
+                  <b-card-body class="m-0 mt-1 p-1" style="flex-grow: 1; max-height: 2000px; overflow-y: auto;">
+                    <div v-for="(attributeKey, attributeIndex) in Object.keys(collectionTokensAttributesWithCounts).sort()" v-bind:key="attributeIndex">
+                      <b-card header-class="m-0 px-2 pt-2 pb-0" body-class="p-0" class="m-0 p-0 border-0">
+                        <template #header>
+                          <span variant="secondary" class="small truncate">
+                            <!-- {{ slugToTitle(attributeKey) }} -->
+                            {{ attributeKey }}
+                          </span>
+                        </template>
+                        <font size="-2">
+                          <b-table small fixed striped sticky-header="200px" :fields="collectionAttributeFields" :items="getSortedTraitsForCollectionTokensAttributes(attributeKey)" head-variant="light">
+                            <template #cell(select)="data">
+                              <b-form-checkbox size="sm" :checked="(collectionAttributeFilter[attributeKey] && collectionAttributeFilter[attributeKey].attributeOption) ? 1 : 0" value="1" @change="collectionFilterChange(attributeKey, data.item.attributeOption)"></b-form-checkbox>
+                            </template>
+                            <template #cell(attributeOption)="data">
+                              {{ data.item.attributeOption }}
+                            </template>
+                            <template #cell(attributeTotal)="data">
+                              {{ data.item.attributeTotal.length }}
+                            </template>
+                          </b-table>
+                        </font>
+                      </b-card>
+                    </div>
+                  </b-card-body>
+                </b-card>
+              </b-col>
+              <b-col class="m-0 p-0">
+                <div v-if="!ownerView">
                   <b-card-group deck class="m-1 ml-0 p-0">
-                    <div v-for="tokenId in data.item.tokenIds">
-                      <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7rem;">
-                        <b-avatar button rounded size="7rem" :src="tokens[tokenId].svg"></b-avatar>
+                    <div v-for="token in pagedFilteredCollectionTokens">
+                      <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 15rem;">
+                        <b-avatar button rounded size="15rem" :src="'./images/cryptocat_' + token.tokenId + '.png'" style="background-color: #fafafa; "></b-avatar>
                         <b-card-text class="text-right">
                           <div class="d-flex justify-content-between m-0 p-0">
-                            <font size="-2">
-                              <b-button size="sm" :id="'popover-target-' + tokenId" variant="link" class="m-0 p-0">
-                                {{ tokenId }}
-                              </b-button>
-                              <b-popover :target="'popover-target-' + tokenId" placement="right">
-                                <template #title>{{ tokenId }}</template>
-                                <b-link :href="'https://opensea.io/assets/ethereum/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'View in opensea.io'" target="_blank">
-                                  OpenSea
-                                </b-link>
-                                <br />
-                                <b-link :href="'https://looksrare.org/collections/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'View in looksrare.org'" target="_blank">
-                                  LooksRare
-                                </b-link>
-                                <br />
-                                <b-link :href="'https://x2y2.io/eth/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'View in x2y2.io'" target="_blank">
-                                  X2Y2
-                                </b-link>
-                                <br />
-                                <b-link :href="'https://app.indeliblelabs.io/api/png/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'Server generated PNG'" target="_blank">
-                                  PNG Image
-                                </b-link>
-                              </b-popover>
-                            </font>
-                          </div>
-                          <div class="flex-grow-1">
+                            <div>
+                              <font size="-2">
+                                <b-button size="sm" :id="'popover-target-' + token.tokenId" variant="link" class="m-0 p-0">
+                                  {{ token.tokenId }}
+                                </b-button>
+                                <b-popover :target="'popover-target-' + token.tokenId" placement="right">
+                                  <template #title>{{ token.tokenId }}</template>
+                                  <b-link :href="'https://opensea.io/assets/ethereum/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in opensea.io'" target="_blank">
+                                    OpenSea
+                                  </b-link>
+                                  <br />
+                                  <b-link :href="'https://looksrare.org/collections/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in looksrare.org'" target="_blank">
+                                    LooksRare
+                                  </b-link>
+                                  <br />
+                                  <b-link :href="'https://x2y2.io/eth/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'View in x2y2.io'" target="_blank">
+                                    X2Y2
+                                  </b-link>
+                                  <br />
+                                  <b-link :href="'https://app.indeliblelabs.io/api/png/' + contractAddress + '/' + token.tokenId" v-b-popover.hover.bottom="'Server generated PNG'" target="_blank">
+                                    PNG Image
+                                  </b-link>
+                                </b-popover>
+                              </font>
+                            </div>
+                            <div class="flex-grow-1">
+                            </div>
+                            <div>
+                              <font size="-1">
+                                <b-badge variant="transparent" v-b-popover.hover.bottom="'On '">{{ owner(token.tokenId) }}</b-badge>
+                              </font>
+                            </div>
+                            <div class="flex-grow-1">
+                            </div>
+                            <div v-if="token.price && token.price.price">
+                              <font size="-1">
+                                <b-badge variant="success" v-b-popover.hover.bottom="'On ' + token.price.source">{{ token.price.price }}</b-badge>
+                              </font>
+                            </div>
                           </div>
                         </b-card-text>
                       </b-card>
                     </div>
                   </b-card-group>
-                </template>
-              </b-table>
-            </div>
+                </div>
+                <div v-else>
+                  <b-table small :fields="ownersFields" :items="pagedFilteredSortedTokensByOwners" responsive="sm" class="m-1">
+                    <template #cell(index)="data">
+                      {{ ((ownerCurrentPage - 1) * ownerPageSize) + parseInt(data.index) + 1 }}
+                    </template>
+                    <template #cell(owner)="data">
+                      {{ owner(data.item.tokenIds[0]) }}
+                      {{ data.item.tokenIds.length + '(' + (data.item.tokenIds.length*100/totalSupply).toFixed(2) + '%)' }}
+                    </template>
+                    <template #cell(tokens1)="data">
+                      <b-card-group deck class="m-1 ml-0 p-0">
+                        <div v-for="tokenId in data.item.tokenIds">
+                          <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7rem;">
+                            <b-avatar button rounded size="7rem" :src="tokens[tokenId].svg"></b-avatar>
+                            <b-card-text class="text-right">
+                              <div class="d-flex justify-content-between m-0 p-0">
+                                <font size="-2">
+                                  <b-button size="sm" :id="'popover-target-' + tokenId" variant="link" class="m-0 p-0">
+                                    {{ tokenId }}
+                                  </b-button>
+                                  <b-popover :target="'popover-target-' + tokenId" placement="right">
+                                    <template #title>{{ tokenId }}</template>
+                                    <b-link :href="'https://opensea.io/assets/ethereum/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'View in opensea.io'" target="_blank">
+                                      OpenSea
+                                    </b-link>
+                                    <br />
+                                    <b-link :href="'https://looksrare.org/collections/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'View in looksrare.org'" target="_blank">
+                                      LooksRare
+                                    </b-link>
+                                    <br />
+                                    <b-link :href="'https://x2y2.io/eth/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'View in x2y2.io'" target="_blank">
+                                      X2Y2
+                                    </b-link>
+                                    <br />
+                                    <b-link :href="'https://app.indeliblelabs.io/api/png/' + contractAddress + '/' + tokenId" v-b-popover.hover.bottom="'Server generated PNG'" target="_blank">
+                                      PNG Image
+                                    </b-link>
+                                  </b-popover>
+                                </font>
+                              </div>
+                              <div class="flex-grow-1">
+                              </div>
+                            </b-card-text>
+                          </b-card>
+                        </div>
+                      </b-card-group>
+                    </template>
+                  </b-table>
+                </div>
+              </b-col>
+            </b-row>
           </b-card-body>
         </b-card>
       </b-container>
@@ -307,6 +342,7 @@
           info: INFO[0],
           data: {},
           showInfo: false,
+          showFilter: true,
           ownerView: false,
           currentPage: 0,
           ownerCurrentPage: 1,
@@ -336,6 +372,11 @@
             { value: 2500, text: '2.5k' },
             { value: 10000, text: '10k' },
           ],
+          collectionAttributeFields: [
+            { key: 'select', label: '', thStyle: 'width: 10%;' },
+            { key: 'attributeOption', label: 'Attribute' /*, sortable: true*/ },
+            { key: 'attributeTotal', label: 'Count', /*sortable: true,*/ thStyle: 'width: 30%;', thClass: 'text-right', tdClass: 'text-right' },
+          ],
           ownersFields: [
             { key: 'index', label: '#' },
             { key: 'owner', label: 'Owner' },
@@ -346,7 +387,8 @@
           prices: {},
           owners: {},
           ensMap: {},
-          selectedTraits: {},
+          selectedTraits: {}, // TODO: Delete
+          collectionAttributeFilter: {},
           sync: {
             section: null,
             // ? error: false,
@@ -420,8 +462,29 @@
             // },
 
             // for (const [tokenId, token] of Object.entries(this.data)) {
-            for (const [tokenId, token] of Object.entries(CRYPTOCATSMETADATA)) {
-              stage1Data.push({ tokenId, ...token });
+            if (Object.keys(this.collectionAttributeFilter) == 0) {
+              for (const [tokenId, token] of Object.entries(CRYPTOCATSMETADATA)) {
+                stage1Data.push({ tokenId, ...token });
+              }
+            } else {
+              let selectedTokenIds = [];
+              for (const [trait, value] of Object.entries(this.collectionAttributeFilter)) {
+                let thisTraitTokenIds = [];
+                for (const selectedValue of Object.keys(value)) {
+                  const tokenIds = this.collectionTokensAttributesWithCounts[trait][selectedValue];
+                  thisTraitTokenIds = [...thisTraitTokenIds, ...tokenIds];
+                }
+                if (selectedTokenIds.length == 0) {
+                  selectedTokenIds = thisTraitTokenIds;
+                } else {
+                  selectedTokenIds = selectedTokenIds.filter(tokenId => thisTraitTokenIds.includes(tokenId));
+                }
+              }
+              // stage1Data = Object.values(selectedTokenIds).map(tokenId => { tokenId, CRYPTOCATSMETADATA[tokenId] });
+              for (const tokenId of selectedTokenIds) {
+                const token = CRYPTOCATSMETADATA[tokenId];
+                stage1Data.push({ tokenId, ...token });
+              }
             }
             // console.log(JSON.stringify(stage1Data.slice(12, 14), null, 2));
 
@@ -607,7 +670,33 @@
           getSVG(layerIndex, traitIndex) {
             return INFO[0].layers[layerIndex].traits[parseInt(traitIndex)].svg;
           },
+          getSortedTraitsForCollectionTokensAttributes(category) {
+            const results = [];
+            for (let attributeKey in this.collectionTokensAttributesWithCounts[category]) {
+              const c = this.collectionTokensAttributesWithCounts[category][attributeKey];
+              results.push({ attributeOption: attributeKey, attributeTotal: c })
+            }
+            results.sort((a, b) => b.attributeTotal.length - a.attributeTotal.length);
+            return results;
+          },
+          collectionFilterChange(attribute, option) {
+            if (!this.collectionAttributeFilter[attribute]) {
+              Vue.set(this.collectionAttributeFilter, attribute, {});
+            }
+            if (this.collectionAttributeFilter[attribute][option]) {
+              Vue.delete(this.collectionAttributeFilter[attribute], option);
+              if (Object.keys(this.collectionAttributeFilter[attribute]) == 0) {
+                Vue.delete(this.collectionAttributeFilter, attribute);
+              }
+            } else {
+              Vue.set(this.collectionAttributeFilter[attribute], option, true);
+            }
+            console.log("collectionFilterChange: " + JSON.stringify(this.collectionAttributeFilter));
+          },
           owner(tokenId, length = 24) {
+            if (this.data[tokenId] === undefined) {
+              return "#" + tokenId + " - Unknown owner"; // data not loaded yet
+            }
             const address = this.data[tokenId].isWrapped ? this.data[tokenId].wrappedOwner : this.data[tokenId].owner;
             // console.log("address: " + address);
             // console.log("this.ensMap: " + JSON.stringify(this.ensMap));
