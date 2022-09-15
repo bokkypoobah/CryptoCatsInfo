@@ -1,6 +1,6 @@
 var fs = require('fs');
 const util = require('util');
-// npm install node-fetch
+// npm i node-fetch@2.6.1 - https://stackoverflow.com/questions/70541068/instead-change-the-require-of-index-js-to-a-dynamic-import-which-is-available
 const fetch = require('node-fetch');
 // const BASTARDDATA = require('./bastardData.js');
 const CRYPTOCATSMETADATA = require('./cryptoCatsMetadata.json');
