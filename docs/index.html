@@ -265,7 +265,7 @@
                       <b-card-group deck class="m-1 ml-0 p-0">
                         <div v-for="tokenId in data.item.tokenIds">
                           <b-card body-class="p-0" header-class="p-1" img-top class="m-1 p-0 border-0" style="max-width: 7rem;">
-                            <b-avatar button rounded size="7rem" :src="tokens[tokenId].svg"></b-avatar>
+                            <b-avatar button rounded size="7rem" :src="'./images/cryptocat_' + tokenId + '.png'" style="background-color: #fafafa; "></b-avatar>
                             <b-card-text class="text-right">
                               <div class="d-flex justify-content-between m-0 p-0">
                                 <font size="-2">
@@ -312,7 +312,6 @@
       window.app = new Vue({
         el: '#app',
         data: {
-          // info: INFO[0],
           data: {},
           showInfo: false,
           showFilter: true,
@@ -375,9 +374,6 @@
           wrappedContractAddress() {
             return WRAPPEDCRYPTOCATSADDRESS;
           },
-          tokens() {
-            return INFO[0].tokenData;
-          },
           totalSupply() {
             return Object.keys(CRYPTOCATSMETADATA).length;
           },
@@ -397,7 +393,6 @@
                 }
               }
             }
-            // console.log(JSON.stringify(collator, null, 2));
             return collator;
           },
           filteredCollectionTokens() {
@@ -434,16 +429,24 @@
             for (const tokenId of selectedTokenIds) {
               const token = CRYPTOCATSMETADATA[tokenId];
               const data = this.data[tokenId];
-              if (tokenId == 251 || tokenId == 13) {
-                console.log(tokenId + " " + JSON.stringify(token) + " " + JSON.stringify(data));
-              }
+              // if (tokenId == 251 || tokenId == 13) {
+              //   console.log(tokenId + " " + JSON.stringify(token) + " " + JSON.stringify(data));
+              // }
               let price = null;
               let priceSource = null;
               if (data && !data.isWrapped && data.isForSale && data.seller == data.owner) {
                 price = data.minPrice;
                 priceSource = "CryptoCatsMarkets";
               }
-              stage1Data.push({ tokenId, ...token, price, priceSource, isWrapped: data && data.isWrapped });
+              let owner = null;
+              if (data) {
+                if (data.isWrapped) {
+                  owner = data.wrappedOwner;
+                } else {
+                  owner = data.owner;
+                }
+              }
+              stage1Data.push({ tokenId, ...token, price, priceSource, isWrapped: data && data.isWrapped, owner, name });
             }
 
             let results = stage1Data;
@@ -466,6 +469,7 @@
                 }
               }
             }
+            console.log("filteredCollectionTokens: " + JSON.stringify(results.slice(0, 5)));
             return results;
           },
           filteredSortedCollectionTokens() {
@@ -515,7 +519,7 @@
           filteredTokensByOwners() {
             const collator = {};
             for (result of Object.values(this.filteredCollectionTokens)) {
-              const owner = this.owners[result.tokenId];
+              const owner = result.owner;
               if (!collator[owner]) {
                 collator[owner] = [result.tokenId];
               } else {
