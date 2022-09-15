@@ -23,6 +23,21 @@ node 01_scrapeMetadata.js
 
 Results in [scripts/cryptoCatsMetadata.json](scripts/cryptoCatsMetadata.json).
 
+<br />
+
+<hr />
+
+### Retrieving Images
+
+In [scripts](scripts):
+
+```
+node 02_downloadImages.js
+
+```
+
+Results: All 625 PNG files in [scripts/images](scripts/images).
+
 
 <br />
 
