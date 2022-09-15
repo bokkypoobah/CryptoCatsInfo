@@ -464,8 +464,19 @@
             // for (const [tokenId, token] of Object.entries(this.data)) {
             if (Object.keys(this.collectionAttributeFilter) == 0) {
               for (const [tokenId, token] of Object.entries(CRYPTOCATSMETADATA)) {
-                stage1Data.push({ tokenId, ...token });
+                const data = this.data[tokenId];
+                if (tokenId == 251) {
+                  console.log(tokenId + " " + JSON.stringify(token) + " " + JSON.stringify(data));
+                }
+                let price = null;
+                let priceSource = null;
+                if (data && !data.isWrapped && data.isForSale && data.seller == data.owner) {
+                  price = data.minPrice;
+                  priceSource = "CryptoCatsMarkets";
+                }
+                stage1Data.push({ tokenId, ...token, price, priceSource });
               }
+              console.log(JSON.stringify(stage1Data.slice(251, 252), null, 2));
             } else {
               let selectedTokenIds = [];
               for (const [trait, value] of Object.entries(this.collectionAttributeFilter)) {
@@ -486,7 +497,6 @@
                 stage1Data.push({ tokenId, ...token });
               }
             }
-            // console.log(JSON.stringify(stage1Data.slice(12, 14), null, 2));
 
             // if (Object.keys(this.selectedTraits).length == 0) {
             //   for (const tokenId of Object.keys(INFO[0].tokenData)) {
@@ -545,8 +555,8 @@
               results.sort((a, b) => b.tokenId - a.tokenId);
             } else if (this.sortOption == 'priceasc') {
               results.sort((a, b) => {
-                const pricea = a.price && a.price.price || null;
-                const priceb = b.price && b.price.price || null;
+                const pricea = a.price || null;
+                const priceb = b.price || null;
                 if (pricea == priceb) {
                   return a.tokenId - b.tokenId;
                 } else if (pricea != null && priceb == null) {
@@ -559,8 +569,8 @@
               });
             } else if (this.sortOption == 'pricedsc') {
               results.sort((a, b) => {
-                const pricea = a.price && a.price.price || null;
-                const priceb = b.price && b.price.price || null;
+                const pricea = a.price || null;
+                const priceb = b.price || null;
                 if (pricea == priceb) {
                   return a.tokenId - b.tokenId;
                 } else if (pricea != null && priceb == null) {
@@ -752,7 +762,9 @@
                   const seller = offer[2];
                   const minPrice = ethers.utils.formatEther(offer[3]);
                   const sellOnlyTo = offer[4];
+                  // let price = null;
                   if (isForSale && seller == owner) {
+                    // price = minPrice;
                     console.log(tokenIds[j] + " " + owner.substring(0, 16) + " " + name +
                     " isForSale: " + isForSale + ", catIndex: " + catIndex + ", seller: " + seller.substring(0, 16) +
                       ", minPrice: " + minPrice + ", sellOnlyTo: " + sellOnlyTo.substring(0, 16));
@@ -764,6 +776,7 @@
                     attributes: CRYPTOCATSMETADATA[tokenIds[j]].attributes,
                     name,
                     isForSale,
+                    // price,
                     catIndex,
                     seller,
                     minPrice,
