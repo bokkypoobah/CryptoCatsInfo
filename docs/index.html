@@ -417,24 +417,30 @@
             for (const tokenId of selectedTokenIds) {
               const token = CRYPTOCATSMETADATA[tokenId];
               const data = this.data[tokenId];
-              if (tokenId == 546 || tokenId == 13) {
-                console.log(tokenId + " " + JSON.stringify(token) + " " + JSON.stringify(data));
-              }
+              let isWrapped = false;
               let price = null;
               let priceSource = null;
-              if (data && !data.isWrapped && data.isForSale && data.seller == data.owner) {
-                price = data.minPrice;
-                priceSource = "CryptoCatsMarkets";
-              }
               let owner = null;
+              // if (tokenId == 546 || tokenId == 13) {
+              //   console.log(tokenId + " " + JSON.stringify(token) + " " + JSON.stringify(data));
+              // }
               if (data) {
-                if (data.isWrapped) {
+                isWrapped = data.isWrapped;
+                if (isWrapped) {
                   owner = data.wrappedOwner;
+                  if (data.wrappedPrice != null) {
+                    price = data.wrappedPrice.price;
+                    priceSource = data.wrappedPrice.source;
+                  }
                 } else {
                   owner = data.owner;
+                  if (data.isForSale && data.seller == data.owner) {
+                    price = data.minPrice;
+                    priceSource = "CryptoCatsMarkets";
+                  }
                 }
               }
-              stage1Data.push({ tokenId, ...token, price, priceSource, isWrapped: data && data.isWrapped, owner, name });
+              stage1Data.push({ tokenId, ...token, price, priceSource, isWrapped, owner, name });
             }
 
             let results = stage1Data;
@@ -708,7 +714,7 @@
               do {
                 let url = "https://api.reservoir.tools/tokens/v5?contract=" + WRAPPEDCRYPTOCATSADDRESS + "&limit=100" +
                   (continuation != null ? "&continuation=" + continuation : '');
-                console.log("url: " + url);
+                // console.log("url: " + url);
                 const priceData = await fetch(url)
                   // .then(handleErrors)
                   .then(response => response.json())
@@ -717,11 +723,9 @@
                      // state.sync.error = true;
                      return [];
                   });
-                // console.log(JSON.stringify(priceData));
                 continuation = priceData.continuation;
                 if (priceData && priceData.tokens) {
                   for (const token of priceData.tokens) {
-                    // console.log(JSON.stringify(token, null, 2));
                     let price = null;
                     let validUntil = null;
                     let source = null;
@@ -730,7 +734,6 @@
                       validUntil = token.market.floorAsk.validUntil;
                       source = token.market.floorAsk.source.name;
                     }
-                    // console.log(token.token.tokenId + " " + JSON.stringify(token) + " " + price + " " + validUntil + " " + source);
                     data[token.token.tokenId].wrappedPrice = { price, validUntil, source, lastSell: token.token.lastSell, rarityRank: token.rarityRank };
                   }
                   this.sync.completed = parseInt(this.sync.completed) + Object.keys(priceData.tokens).length;
