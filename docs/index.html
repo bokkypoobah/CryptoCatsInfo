@@ -653,7 +653,7 @@
               for (let i = 0; i < this.totalSupply; i += NFTOWNERBATCHSIZE) {
                 const to = (i + NFTOWNERBATCHSIZE > this.totalSupply) ? this.totalSupply : i + NFTOWNERBATCHSIZE;
                 const tokenIds = generateRange(i, to - 1, 1);
-                const catData = await cryptoCatsHelper.getCatData(CRYPTOCATSV1, tokenIds);
+                const catData = await cryptoCatsHelper.getCatData(CRYPTOCATSV3, tokenIds);
                 for (let j = 0; j < catData[0].length; j++) {
                   const owner = catData[0][j];
                   let isWrapped = false;
