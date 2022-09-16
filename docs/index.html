@@ -207,6 +207,17 @@
                         <b-avatar button rounded size="15rem" :src="'./images/cryptocat_' + token.tokenId + '.png'" style="background-color: #fafafa; "></b-avatar>
                         <b-card-text class="text-right">
                           <div class="d-flex justify-content-between m-0 p-0">
+                            <div class="flex-grow-1">
+                            </div>
+                            <div>
+                              <font size="-1">
+                                <b-badge variant="transparent" v-b-popover.hover.bottom="token.isWrapped ? 'Wrapped' : 'Unwrapped'">{{ token.name }}</b-badge>
+                              </font>
+                            </div>
+                            <div class="flex-grow-1">
+                            </div>
+                          </div>
+                          <div class="d-flex justify-content-between m-0 p-0">
                             <div>
                               <font size="-2">
                                 <b-button size="sm" :id="'popover-target-' + token.tokenId" variant="link" class="m-0 p-0">
@@ -421,11 +432,13 @@
               let price = null;
               let priceSource = null;
               let owner = null;
-              // if (tokenId == 546 || tokenId == 13) {
+              let name = token.name;
+              // if (tokenId == 52 || tokenId == 13) {
               //   console.log(tokenId + " " + JSON.stringify(token) + " " + JSON.stringify(data));
               // }
               if (data) {
                 isWrapped = data.isWrapped;
+                name = data.name;
                 if (isWrapped) {
                   owner = data.wrappedOwner;
                   if (data.wrappedPrice != null) {
@@ -463,7 +476,7 @@
                 }
               }
             }
-            // console.log("filteredCollectionTokens: " + JSON.stringify(results.slice(0, 5)));
+            // console.log("filteredCollectionTokens: " + JSON.stringify(results.slice(52, 55)));
             return results;
           },
           filteredSortedCollectionTokens() {
@@ -695,7 +708,7 @@
 
               this.sync.section = null;
               this.sync.completed = 0;
-              this.sync.total = wrappedTokenIds.length;
+              this.sync.total = wrappedTokenIds.length == 0 ? null : wrappedTokenIds.length;
               this.sync.section = "WrappedCryptoCats";
               for (let i = 0; i < wrappedTokenIds.length; i += NFTOWNERBATCHSIZE) {
                 const batch = wrappedTokenIds.slice(i, parseInt(i) + NFTOWNERBATCHSIZE);
@@ -708,7 +721,7 @@
 
               this.sync.section = null;
               this.sync.completed = 0;
-              this.sync.total = wrappedTokenIds.length;
+              this.sync.total = wrappedTokenIds.length == 0 ? null : wrappedTokenIds.length;
               this.sync.section = "Wrapped Prices";
               let continuation = null;
               do {
