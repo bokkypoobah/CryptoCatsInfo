@@ -211,7 +211,7 @@
                             </div>
                             <div>
                               <font size="-1">
-                                <b-badge variant="transparent" v-b-popover.hover.bottom="token.isWrapped ? 'Wrapped' : 'Unwrapped'">{{ token.name }}</b-badge>
+                                <b-badge variant="transparent">{{ token.name || ' ' }}</b-badge>
                               </font>
                             </div>
                             <div class="flex-grow-1">
